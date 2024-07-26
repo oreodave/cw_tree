@@ -31,6 +31,22 @@
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
 
+Node rightmost_node(const NodeAllocator &allocator)
+{
+  auto node = allocator.getVal(0);
+  while (node.right.has_value())
+    node = allocator.getVal(node.right.value());
+  return node;
+}
+
+Node leftmost_node(const NodeAllocator &allocator)
+{
+  auto node = allocator.getVal(0);
+  while (node.left.has_value())
+    node = allocator.getVal(node.left.value());
+  return node;
+}
+
 
 int main(void)
 {
