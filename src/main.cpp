@@ -63,6 +63,19 @@ void draw_fraction(Fraction f, word_t x, word_t y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
+void draw_node_number_line(index_t index, const NodeAllocator &allocator,
+                           long double lower, long double upper)
+{
+  if (index.has_value())
+  {
+    Node n   = allocator.getVal(index.value());
+    word_t x = clamp_to_width(n.value.norm, lower, upper);
+    DrawLine(x, LINE_TOP, x, LINE_BOTTOM, index.value() == 0 ? GREEN : RED);
+    draw_node_number_line(n.left, allocator, lower, upper);
+    draw_node_number_line(n.right, allocator, lower, upper);
+  }
+}
+
 int main(void)
 {
   // NodeAllocator allocator{256};
