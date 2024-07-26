@@ -52,7 +52,7 @@ struct NodeAllocator
 {
   std::vector<Node> vec;
 
-  NodeAllocator(word_t capacity);
+  NodeAllocator(word_t capacity = 0);
   word_t alloc(Node n);
   Node getVal(word_t n) const;
   Node &getRef(word_t n);
