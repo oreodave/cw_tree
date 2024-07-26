@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -72,6 +73,19 @@ struct Fraction
     is_simplified = true;
   }
 };
+
+struct Node
+{
+  Fraction value;
+  Node *left, *right;
+
+  Node(Fraction val, Node *left = nullptr, Node *right = nullptr)
+      : value{val}, left{left}, right{right}
+  {
+  }
+};
+
+std::vector<Node> nodes;
 
 int main(void)
 {
