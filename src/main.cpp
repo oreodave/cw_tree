@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <stack>
 #include <tuple>
 
 #include <raylib.h>
@@ -63,16 +64,21 @@ void draw_fraction(Fraction f, word_t x, word_t y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
-void draw_node_number_line(index_t index, const NodeAllocator &allocator,
-                           long double lower, long double upper)
+void draw_node_number_line(const NodeAllocator &allocator, long double lower,
+                           long double upper)
 {
-  if (index.has_value())
+  std::stack<Node> stack;
+  stack.push(allocator.getVal(0));
+  while (!stack.empty())
   {
-    Node n   = allocator.getVal(index.value());
+    Node n = stack.top();
+    stack.pop();
     word_t x = clamp_to_width(n.value.norm, lower, upper);
-    DrawLine(x, LINE_TOP, x, LINE_BOTTOM, index.value() == 0 ? GREEN : RED);
-    draw_node_number_line(n.left, allocator, lower, upper);
-    draw_node_number_line(n.right, allocator, lower, upper);
+    DrawLine(x, LINE_TOP, x, LINE_BOTTOM, RED);
+    if (n.left.has_value())
+      stack.push(allocator.getVal(n.left.value()));
+    if (n.right.has_value())
+      stack.push(allocator.getVal(n.right.value()));
   }
 }
 
