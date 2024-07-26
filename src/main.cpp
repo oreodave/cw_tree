@@ -18,7 +18,24 @@
 #include <cstdio>
 #include <raylib.h>
 
+#include <sstream>
+#include <string>
+
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
+
 typedef uint64_t word_t;
+
+word_t gcd(word_t a, word_t b)
+{
+  if (a == b)
+    return a;
+  else if (a == 1 || b == 1)
+    return 1;
+  for (word_t r = b % a; r != 0; b = a, a = r, r = b % a)
+    continue;
+  return a;
+}
 
 struct Fraction
 {
@@ -37,14 +54,9 @@ struct Fraction
     // No-Op if already simplified
     if (is_simplified)
       return;
-    word_t a = numerator < denominator ? numerator : denominator,
-           b = numerator < denominator ? denominator : numerator;
-    // Euclidean algorithm
-    for (word_t r = b % a; r != 0; b = a, a = r, r = b % a)
-      continue;
-    // a will be the gcd
-    numerator /= a;
-    denominator /= a;
+    word_t hcf = gcd(MIN(numerator, denominator), MAX(numerator, denominator));
+    numerator /= hcf;
+    denominator /= hcf;
     // Ensure this is a noop after this
     is_simplified = true;
   }
