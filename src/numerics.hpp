@@ -24,7 +24,7 @@
 #include <vector>
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
-#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#define MAX(A, B) ((B) < (A) ? (A) : (B))
 typedef uint64_t word_t;
 
 struct Fraction
