@@ -75,6 +75,13 @@ struct Fraction
   }
 };
 
+std::string to_string(const Fraction &f)
+{
+  std::stringstream ss;
+  ss << f.numerator << "/" << f.denominator;
+  return ss.str();
+}
+
 struct Node
 {
   Fraction value;
