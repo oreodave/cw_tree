@@ -19,6 +19,7 @@
 
 #include <cstdint>
 
+#include <optional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -26,6 +27,7 @@
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((B) < (A) ? (A) : (B))
 typedef uint64_t word_t;
+typedef std::optional<word_t> index_t;
 
 struct Fraction
 {
@@ -40,9 +42,10 @@ struct Fraction
 struct Node
 {
   Fraction value;
-  int64_t left, right;
+  index_t left, right;
 
-  Node(Fraction val = {}, int64_t left = -1, int64_t right = -1);
+  Node(Fraction val = {}, index_t left = std::nullopt,
+       index_t right = std::nullopt);
 };
 
 struct NodeAllocator
@@ -57,6 +60,6 @@ word_t gcd(word_t a, word_t b);
 Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator);
 
 std::string to_string(const Fraction &);
-std::string to_string(const NodeAllocator &, const word_t, int depth = 1);
+std::string to_string(const NodeAllocator &, const index_t, int depth = 1);
 
 #endif

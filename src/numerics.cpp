@@ -43,7 +43,7 @@ bool Fraction::operator==(const Fraction &other)
   return numerator == other.numerator && denominator == other.denominator;
 }
 
-Node::Node(Fraction val, int64_t left, int64_t right)
+Node::Node(Fraction val, index_t left, index_t right)
     : value{val}, left{left}, right{right}
 {
 }
@@ -107,10 +107,13 @@ void indent_depth(int depth, std::stringstream &ss)
     ss << "  ";
 }
 
-std::string to_string(const NodeAllocator &allocator, const word_t n, int depth)
+std::string to_string(const NodeAllocator &allocator, const index_t n,
+                      int depth)
 {
+  if (!n.has_value())
+    return "NIL";
   std::stringstream ss;
-  Node x = allocator.vec[n];
+  Node x = allocator.getVal(n.value());
   ss << "(" << to_string(x.value) << "\n";
   indent_depth(depth, ss);
   if (x.left == -1)
