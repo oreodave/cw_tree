@@ -101,6 +101,31 @@ word_t alloc_node(Node n)
   return nodes.size() - 1;
 }
 
+void indent_depth(int depth, std::stringstream &ss)
+{
+  for (int i = 0; i < depth; ++i)
+    ss << "\t";
+}
+
+std::string to_string(Node n, int depth = 1)
+{
+  std::stringstream ss;
+  ss << "(" << to_string(n.value) << "\n";
+  indent_depth(depth, ss);
+  if (n.left == -1)
+    ss << "()";
+  else
+    ss << to_string(nodes[n.left], depth + 1);
+  ss << "\n";
+  indent_depth(depth, ss);
+  if (n.right == -1)
+    ss << "()";
+  else
+    ss << to_string(nodes[n.right], depth + 1);
+  ss << ")";
+  return ss.str();
+}
+
 std::queue<word_t> to_iterate;
 
 void iterate(void)
