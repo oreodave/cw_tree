@@ -53,7 +53,9 @@ struct NodeAllocator
   std::vector<Node> vec;
 
   NodeAllocator(word_t capacity);
-  word_t alloc_node(Node n);
+  word_t alloc(Node n);
+  Node getVal(word_t n) const;
+  Node &getRef(word_t n);
 };
 
 word_t gcd(word_t a, word_t b);

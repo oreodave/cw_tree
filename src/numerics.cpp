@@ -52,10 +52,26 @@ NodeAllocator::NodeAllocator(word_t capacity) : vec{capacity}
 {
 }
 
-word_t NodeAllocator::alloc_node(Node n)
+word_t NodeAllocator::alloc(Node n)
 {
+  word_t ind = vec.size();
   vec.push_back(n);
-  return vec.size() - 1;
+  return ind;
+}
+
+// WHY DO I NEED TO DO IT TWICE REEEEEEE
+Node &NodeAllocator::getRef(word_t n)
+{
+  if (n >= vec.size())
+    return vec[0];
+  return vec[n];
+}
+
+Node NodeAllocator::getVal(word_t n) const
+{
+  if (n >= vec.size())
+    return vec[0];
+  return vec[n];
 }
 
 word_t gcd(word_t a, word_t b)
@@ -74,23 +90,23 @@ Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
   if (queue.empty())
     return {};
   word_t index = queue.front();
-  Node node    = allocator.vec[index];
-  if (node.left == -1)
+  Node node    = allocator.getVal(index);
+  if (!node.left.has_value())
   {
-    allocator.vec[index].left = allocator.alloc_node(Fraction{
+    allocator.getRef(index).left = allocator.alloc(Fraction{
         node.value.numerator, node.value.numerator + node.value.denominator});
   }
-  if (node.right == -1)
+  if (!node.right.has_value())
   {
-    allocator.vec[index].right = allocator.alloc_node(Fraction{
+    allocator.getRef(index).right = allocator.alloc(Fraction{
         node.value.numerator + node.value.denominator, node.value.denominator});
   }
   queue.pop();
-  queue.push(allocator.vec[index].left);
-  queue.push(allocator.vec[index].right);
-  node          = allocator.vec[index];
-  Fraction best = MAX(node.value, allocator.vec[node.left].value);
-  best          = MAX(best, allocator.vec[node.right].value);
+  queue.push(allocator.getVal(index).left.value());
+  queue.push(allocator.getVal(index).right.value());
+  node          = allocator.getVal(index);
+  Fraction best = MAX(node.value, allocator.getVal(node.left.value()).value);
+  best          = MAX(best, allocator.getVal(node.right.value()).value);
   return best;
 }
 
