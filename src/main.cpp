@@ -16,21 +16,19 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <raylib.h>
 
 #include <sstream>
 #include <string>
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
-
 typedef uint64_t word_t;
 
 word_t gcd(word_t a, word_t b)
 {
   if (a == b)
     return a;
-  else if (a == 1 || b == 1)
+  else if (a <= 1 || b <= 1)
     return 1;
   for (word_t r = b % a; r != 0; b = a, a = r, r = b % a)
     continue;
@@ -42,11 +40,11 @@ struct Fraction
   word_t numerator, denominator;
   bool is_simplified;
 
-  Fraction(word_t numerator = 0, word_t denominator = 1,
-           bool is_simplified = false)
-      : numerator{numerator}, denominator{denominator},
-        is_simplified{is_simplified}
+  Fraction(word_t numerator = 0, word_t denominator = 1)
+      : numerator{numerator}, denominator{denominator}, is_simplified{false}
   {
+    // TODO: Figure out if this is a good idea, or simplifying afterwards
+    simplify();
   }
 
   bool operator<(const Fraction other)
