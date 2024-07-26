@@ -49,6 +49,19 @@ struct Fraction
   {
   }
 
+  bool operator<(const Fraction other)
+  {
+    if (other.denominator == denominator)
+      return numerator < other.numerator;
+    // TODO: Is it better to use the GCD?
+    return (numerator * other.denominator) < (other.numerator * denominator);
+  }
+
+  bool operator==(const Fraction &other)
+  {
+    return numerator == other.numerator && denominator == other.denominator;
+  }
+
   void simplify(void)
   {
     // No-Op if already simplified
