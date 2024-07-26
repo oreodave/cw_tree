@@ -14,10 +14,23 @@
  * Description: Entrypoint
  */
 
+#include "./numerics.hpp"
+
+#include <cmath>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
+#include <tuple>
+
 #include <raylib.h>
 
-#include "./numerics.hpp"
+#define WIDTH       1024
+#define HEIGHT      1024
+#define FONT_SIZE   10
+#define CIRCLE_SIZE 2
+#define LINE_TOP    (7 * HEIGHT / 16)
+#define LINE_BOTTOM (9 * HEIGHT / 16)
+
 
 int main(void)
 {
