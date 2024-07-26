@@ -106,18 +106,22 @@ void draw_number_line(const NodeAllocator &allocator)
 
 int main(void)
 {
-  // NodeAllocator allocator{256};
-  // std::queue<word_t> to_iterate;
-  // Fraction best_frac{1, 2};
-  // word_t root = allocator.alloc_node({best_frac});
-  // to_iterate.push(root);
-
-  InitWindow(800, 600, "Calkin-Wilf Trees");
+  NodeAllocator allocator{0};
+  std::queue<word_t> to_iterate;
+  Fraction best_frac{1, 2};
+  word_t root = allocator.alloc({best_frac});
+  to_iterate.push(root);
+  InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Trees");
   while (!WindowShouldClose())
   {
+    if (IsKeyPressed(KEY_SPACE))
+    {
+      iterate(to_iterate, allocator);
+      count += 2;
+    }
     ClearBackground(BLACK);
     BeginDrawing();
-    DrawText("Hello, world!", 50, 50, 25, WHITE);
+    draw_number_line(allocator);
     EndDrawing();
   }
   CloseWindow();
