@@ -45,46 +45,57 @@ struct State
   NodeAllocator allocator;
   std::queue<word_t> iteration_queue;
   word_t root;
-  Node leftmost, rightmost;
-  long double lower_bound, upper_bound;
+
+  struct Bounds
+  {
+    Node leftmost, rightmost;
+    long double lower, upper;
+  } bounds;
 
   State(const Fraction start) : allocator{256}
   {
     root = allocator.alloc(start);
     iteration_queue.push(root);
-    leftmost  = allocator.getVal(root);
-    rightmost = allocator.getVal(root);
+    bounds.leftmost  = allocator.getVal(root);
+    bounds.rightmost = allocator.getVal(root);
+    compute_bounds();
+  }
+
+  void do_iteration(void)
+  {
+    iterate(iteration_queue, allocator);
+    compute_bound_nodes();
     compute_bounds();
   }
 
   void compute_bounds()
   {
-    lower_bound = std::floorl(leftmost.value.norm);
-    upper_bound = std::ceill(rightmost.value.norm);
+    bounds.lower = std::floorl(bounds.leftmost.value.norm);
+    bounds.upper = std::ceill(bounds.rightmost.value.norm);
   }
 
   void compute_bound_nodes()
   {
-    leftmost = allocator.getVal(0);
-    while (leftmost.left.has_value())
-      leftmost = allocator.getVal(leftmost.left.value());
+    bounds.leftmost = allocator.getVal(0);
+    while (bounds.leftmost.left.has_value())
+      bounds.leftmost = allocator.getVal(bounds.leftmost.left.value());
 
-    rightmost = allocator.getVal(0);
-    while (rightmost.right.has_value())
-      rightmost = allocator.getVal(rightmost.right.value());
+    bounds.rightmost = allocator.getVal(0);
+    while (bounds.rightmost.right.has_value())
+      bounds.rightmost = allocator.getVal(bounds.rightmost.right.value());
   }
 
   constexpr word_t clamp_to_width(long double value)
   {
-    return WIDTH / (upper_bound - lower_bound) * (value - lower_bound);
+    return WIDTH / (bounds.upper - bounds.lower) * (value - bounds.lower);
   }
 
   void draw_bounds()
   {
-    word_t lower_x = clamp_to_width(leftmost.value.norm);
-    word_t upper_x = clamp_to_width(rightmost.value.norm);
-    draw_fraction(leftmost.value, lower_x, 3 * HEIGHT / 8);
-    draw_fraction(rightmost.value, upper_x, 3 * HEIGHT / 8);
+    word_t lower_x = clamp_to_width(bounds.leftmost.value.norm);
+    word_t upper_x = clamp_to_width(bounds.rightmost.value.norm);
+    draw_fraction(bounds.leftmost.value, lower_x, 3 * HEIGHT / 8);
+    draw_fraction(bounds.rightmost.value, upper_x, 3 * HEIGHT / 8);
     DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
     DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
   }
@@ -123,9 +134,7 @@ int main(void)
   {
     if (IsKeyPressed(KEY_SPACE))
     {
-      iterate(state.iteration_queue, state.allocator);
-      state.compute_bound_nodes();
-      state.compute_bounds();
+      state.do_iteration();
       count += 2;
     }
     if (prev_count != count)
