@@ -152,6 +152,12 @@ void iterate(void)
 
 int main(void)
 {
-  puts("Hello, world!");
+  word_t root = alloc_node(Fraction{2, 4});
+  to_iterate.push(root);
+  for (int i = 0; i < 10; ++i)
+  {
+    iterate();
+    printf("step[%d]:\n%s\n\n", i, to_string(nodes[root]).c_str());
+  }
   return 0;
 }
