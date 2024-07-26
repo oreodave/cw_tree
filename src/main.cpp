@@ -78,9 +78,9 @@ struct Fraction
 struct Node
 {
   Fraction value;
-  Node *left, *right;
+  int64_t left, right;
 
-  Node(Fraction val, Node *left = nullptr, Node *right = nullptr)
+  Node(Fraction val, int64_t left = -1, int64_t right = -1)
       : value{val}, left{left}, right{right}
   {
   }
@@ -88,34 +88,34 @@ struct Node
 
 std::vector<Node> nodes;
 
-Node *alloc_node(Node n)
+word_t alloc_node(Node n)
 {
   nodes.push_back(n);
-  return nodes.data() + (nodes.size() - 1);
+  return nodes.size() - 1;
 }
 
-std::queue<Node *> to_iterate;
+std::queue<word_t> to_iterate;
 
 void iterate(void)
 {
   if (to_iterate.empty())
     return;
-  Node *node = to_iterate.front();
+  word_t index = to_iterate.front();
+  if (nodes[index].left == -1)
+  {
+    nodes[index].left = alloc_node(Fraction{
+        nodes[index].value.numerator,
+        nodes[index].value.numerator + nodes[index].value.denominator});
+  }
+  if (nodes[index].right == -1)
+  {
+    nodes[index].right = alloc_node(
+        Fraction{nodes[index].value.numerator + nodes[index].value.denominator,
+                 nodes[index].value.denominator});
+  }
   to_iterate.pop();
-  if (!node->left)
-  {
-    node->left =
-        alloc_node(Fraction{node->value.numerator,
-                            node->value.numerator + node->value.denominator});
-  }
-  else if (!node->right)
-  {
-    node->right =
-        alloc_node(Fraction{node->value.numerator + node->value.denominator,
-                            node->value.denominator});
-  }
-  to_iterate.push(node->left);
-  to_iterate.push(node->right);
+  to_iterate.push(nodes[index].left);
+  to_iterate.push(nodes[index].right);
 }
 
 int main(void)
