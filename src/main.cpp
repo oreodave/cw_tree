@@ -87,6 +87,13 @@ struct Node
 };
 
 std::vector<Node> nodes;
+
+Node *alloc_node(Node n)
+{
+  nodes.push_back(n);
+  return nodes.data() + (nodes.size() - 1);
+}
+
 std::queue<Node *> to_iterate;
 
 void iterate(void)
@@ -97,17 +104,15 @@ void iterate(void)
   to_iterate.pop();
   if (!node->left)
   {
-    Node new_node = Fraction{node->value.numerator,
-                             node->value.numerator + node->value.denominator};
-    nodes.push_back(new_node);
-    node->left = nodes.data() + (nodes.size() - 1);
+    node->left =
+        alloc_node(Fraction{node->value.numerator,
+                            node->value.numerator + node->value.denominator});
   }
   else if (!node->right)
   {
-    Node new_node = Fraction{node->value.numerator + node->value.denominator,
-                             node->value.denominator};
-    nodes.push_back(new_node);
-    node->right = nodes.data() + (nodes.size() - 1);
+    node->right =
+        alloc_node(Fraction{node->value.numerator + node->value.denominator,
+                            node->value.denominator});
   }
   to_iterate.push(node->left);
   to_iterate.push(node->right);
