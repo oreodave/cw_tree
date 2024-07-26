@@ -27,7 +27,7 @@
 
 #define WIDTH       1024
 #define HEIGHT      1024
-#define FONT_SIZE   10
+#define FONT_SIZE   20
 #define CIRCLE_SIZE 2
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
@@ -106,18 +106,20 @@ void draw_number_line(const NodeAllocator &allocator)
 
 int main(void)
 {
+  // Setup CW tree
   NodeAllocator allocator{0};
   std::queue<word_t> to_iterate;
   Fraction best_frac{1, 2};
   word_t root = allocator.alloc({best_frac});
   to_iterate.push(root);
 
+  // Setup meta text (counter, iterations, etc)
   word_t count = 1, prev_count = 0;
   std::stringstream format_stream;
   std::string format_str;
   word_t format_str_width = 0;
 
-  InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Trees");
+  InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Tree");
   while (!WindowShouldClose())
   {
     if (IsKeyPressed(KEY_SPACE))
@@ -139,7 +141,7 @@ int main(void)
     BeginDrawing();
     draw_number_line(allocator);
     DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2,
-             LINE_TOP - HEIGHT / 8, FONT_SIZE * 2, WHITE);
+             LINE_TOP - HEIGHT / 4, FONT_SIZE * 2, WHITE);
     EndDrawing();
   }
   CloseWindow();
