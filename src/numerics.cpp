@@ -69,10 +69,10 @@ word_t gcd(word_t a, word_t b)
   return a;
 }
 
-void iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
+Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
 {
   if (queue.empty())
-    return;
+    return {};
   word_t index = queue.front();
   Node node    = allocator.vec[index];
   if (node.left == -1)
@@ -88,6 +88,10 @@ void iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
   queue.pop();
   queue.push(allocator.vec[index].left);
   queue.push(allocator.vec[index].right);
+  node          = allocator.vec[index];
+  Fraction best = MAX(node.value, allocator.vec[node.left].value);
+  best          = MAX(best, allocator.vec[node.right].value);
+  return best;
 }
 
 std::string to_string(const Fraction &f)

@@ -54,7 +54,7 @@ struct NodeAllocator
 };
 
 word_t gcd(word_t a, word_t b);
-void iterate(std::queue<word_t> &queue, NodeAllocator &allocator);
+Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator);
 
 std::string to_string(const Fraction &);
 std::string to_string(const NodeAllocator &, const word_t, int depth = 1);
