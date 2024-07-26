@@ -82,6 +82,28 @@ void draw_node_number_line(const NodeAllocator &allocator, long double lower,
   }
 }
 
+void draw_number_line(const NodeAllocator &allocator)
+{
+  // Draw a general guide number line
+  DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
+  // Figure out the leftmost and rightmost nodes for bounds
+  const auto right       = rightmost_node(allocator);
+  const auto left        = leftmost_node(allocator);
+  const auto upper_bound = std::ceill(right.value.norm);
+  const auto lower_bound = std::floorl(left.value.norm);
+
+  // Draw all the nodes
+  draw_node_number_line(allocator, lower_bound, upper_bound);
+
+  // Draw the bounds, with their values, in white
+  word_t lower_x = clamp_to_width(left.value.norm, lower_bound, upper_bound);
+  word_t upper_x = clamp_to_width(right.value.norm, lower_bound, upper_bound);
+  draw_fraction(left.value, lower_x, 3 * HEIGHT / 8);
+  draw_fraction(right.value, upper_x, 3 * HEIGHT / 8);
+  DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
+  DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
+}
+
 int main(void)
 {
   // NodeAllocator allocator{256};
