@@ -41,7 +41,7 @@ struct Node
   Fraction value;
   int64_t left, right;
 
-  Node(Fraction val, int64_t left = -1, int64_t right = -1);
+  Node(Fraction val = {}, int64_t left = -1, int64_t right = -1);
 };
 
 struct NodeAllocator
@@ -53,9 +53,9 @@ struct NodeAllocator
 };
 
 word_t gcd(word_t a, word_t b);
-void iterate(std::queue<word_t> queue, NodeAllocator &allocator);
+void iterate(std::queue<word_t> &queue, NodeAllocator &allocator);
 
 std::string to_string(const Fraction &);
-std::string to_string(const Node &, int depth = 1);
+std::string to_string(const NodeAllocator &, const word_t, int depth = 1);
 
 #endif
