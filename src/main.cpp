@@ -15,19 +15,26 @@
  */
 
 #include <cstdio>
+#include <raylib.h>
 
 #include "./numerics.hpp"
 
 int main(void)
 {
-  NodeAllocator allocator{256};
-  std::queue<word_t> to_iterate;
-  word_t root = allocator.alloc_node({{1, 2}});
-  to_iterate.push(root);
-  for (int i = 0; i < 10; ++i)
+  // NodeAllocator allocator{256};
+  // std::queue<word_t> to_iterate;
+  // Fraction best_frac{1, 2};
+  // word_t root = allocator.alloc_node({best_frac});
+  // to_iterate.push(root);
+
+  InitWindow(800, 600, "Calkin-Wilf Trees");
+  while (!WindowShouldClose())
   {
-    iterate(to_iterate, allocator);
-    printf("step[%d]:\n%s\n\n", i, to_string(allocator, root).c_str());
+    ClearBackground(BLACK);
+    BeginDrawing();
+    DrawText("Hello, world!", 50, 50, 25, WHITE);
+    EndDrawing();
   }
+  CloseWindow();
   return 0;
 }

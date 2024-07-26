@@ -1,6 +1,6 @@
 CC=g++
 OUT=cwtree.out
-LIBS=
+LIBS=-lm -lraylib
 ARGS=
 
 RELEASE=0
