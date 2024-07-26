@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <cstdio>
 
+#include <queue>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -86,6 +87,31 @@ struct Node
 };
 
 std::vector<Node> nodes;
+std::queue<Node *> to_iterate;
+
+void iterate(void)
+{
+  if (to_iterate.empty())
+    return;
+  Node *node = to_iterate.front();
+  to_iterate.pop();
+  if (!node->left)
+  {
+    Node new_node = Fraction{node->value.numerator,
+                             node->value.numerator + node->value.denominator};
+    nodes.push_back(new_node);
+    node->left = nodes.data() + (nodes.size() - 1);
+  }
+  else if (!node->right)
+  {
+    Node new_node = Fraction{node->value.numerator + node->value.denominator,
+                             node->value.denominator};
+    nodes.push_back(new_node);
+    node->right = nodes.data() + (nodes.size() - 1);
+  }
+  to_iterate.push(node->left);
+  to_iterate.push(node->right);
+}
 
 int main(void)
 {
