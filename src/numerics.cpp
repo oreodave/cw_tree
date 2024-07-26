@@ -48,8 +48,9 @@ Node::Node(Fraction val, index_t left, index_t right)
 {
 }
 
-NodeAllocator::NodeAllocator(word_t capacity) : vec{capacity}
+NodeAllocator::NodeAllocator(word_t capacity)
 {
+  vec.reserve(capacity);
 }
 
 word_t NodeAllocator::alloc(Node n)
