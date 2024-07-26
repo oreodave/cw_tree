@@ -112,11 +112,10 @@ int main(void)
   word_t root = allocator.alloc({best_frac});
   to_iterate.push(root);
 
-  word_t count      = 1;
-  word_t prev_count = 0;
-  std::stringstream count_format;
-  std::string count_str;
-  word_t count_str_width = 0;
+  word_t count = 1, prev_count = 0;
+  std::stringstream format_stream;
+  std::string format_str;
+  word_t format_str_width = 0;
 
   InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Trees");
   while (!WindowShouldClose())
@@ -129,16 +128,17 @@ int main(void)
     if (prev_count != count)
     {
       prev_count = count;
-      count_format << "Count=" << count;
-      count_str = count_format.str();
-      count_format.str("");
-      count_str_width = MeasureText(count_str.c_str(), FONT_SIZE * 2);
+      format_stream << "Count=" << count << "\n\n";
+      format_stream << "Iterations=" << (count - 1) / 2;
+      format_str = format_stream.str();
+      format_stream.str("");
+      format_str_width = MeasureText(format_str.c_str(), FONT_SIZE * 2);
     }
 
     ClearBackground(BLACK);
     BeginDrawing();
     draw_number_line(allocator);
-    DrawText(count_str.c_str(), WIDTH / 2 - count_str_width / 2,
+    DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2,
              LINE_TOP - HEIGHT / 8, FONT_SIZE * 2, WHITE);
     EndDrawing();
   }
