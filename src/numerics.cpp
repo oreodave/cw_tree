@@ -19,12 +19,16 @@
 #include <sstream>
 
 Fraction::Fraction(word_t numerator, word_t denominator)
-    : numerator{numerator}, denominator{denominator}
+    : numerator{numerator}, denominator{denominator},
+      norm{numerator / ((long double)denominator)}
 {
   word_t hcf = gcd(MIN(numerator, denominator), MAX(numerator, denominator));
   numerator /= hcf;
   denominator /= hcf;
 }
+
+// floating point arithmetic inaccuracies blah blah blah better to use
+// simplified fractions here
 
 bool Fraction::operator<(const Fraction other)
 {

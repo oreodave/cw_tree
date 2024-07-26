@@ -30,6 +30,7 @@ typedef uint64_t word_t;
 struct Fraction
 {
   word_t numerator, denominator;
+  long double norm;
 
   Fraction(word_t numerator = 0, word_t denominator = 1);
   bool operator<(const Fraction other);
