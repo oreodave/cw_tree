@@ -32,30 +32,6 @@
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
 
-Node rightmost_node(const NodeAllocator &allocator)
-{
-  auto node = allocator.getVal(0);
-  while (node.right.has_value())
-    node = allocator.getVal(node.right.value());
-  return node;
-}
-
-Node leftmost_node(const NodeAllocator &allocator)
-{
-  auto node = allocator.getVal(0);
-  while (node.left.has_value())
-    node = allocator.getVal(node.left.value());
-  return node;
-}
-
-constexpr word_t clamp_to_width(long double value, long double min,
-                                long double max)
-{
-  // translate v in [min, max] -> v' in [0, WIDTH]
-  // [min, max] -> [0, max-min] -> [0, WIDTH]
-  return WIDTH / (max - min) * (value - min);
-}
-
 void draw_fraction(Fraction f, word_t x, word_t y)
 {
   std::string s{to_string(f)};
@@ -64,54 +40,77 @@ void draw_fraction(Fraction f, word_t x, word_t y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
-void draw_node_number_line(const NodeAllocator &allocator, long double lower,
-                           long double upper)
+struct State
 {
-  std::stack<Node> stack;
-  stack.push(allocator.getVal(0));
-  while (!stack.empty())
+  NodeAllocator allocator;
+  std::queue<word_t> iteration_queue;
+  word_t root;
+  Node leftmost, rightmost;
+  long double lower_bound, upper_bound;
+
+  State(const Fraction start) : allocator{256}
   {
-    Node n = stack.top();
-    stack.pop();
-    word_t x = clamp_to_width(n.value.norm, lower, upper);
-    DrawLine(x, LINE_TOP, x, LINE_BOTTOM, RED);
-    if (n.left.has_value())
-      stack.push(allocator.getVal(n.left.value()));
-    if (n.right.has_value())
-      stack.push(allocator.getVal(n.right.value()));
+    root = allocator.alloc(start);
+    iteration_queue.push(root);
+    leftmost  = allocator.getVal(root);
+    rightmost = allocator.getVal(root);
+    compute_bounds();
   }
-}
 
-void draw_number_line(const NodeAllocator &allocator)
-{
-  // Draw a general guide number line
-  DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
-  // Figure out the leftmost and rightmost nodes for bounds
-  const auto right       = rightmost_node(allocator);
-  const auto left        = leftmost_node(allocator);
-  const auto upper_bound = std::ceill(right.value.norm);
-  const auto lower_bound = std::floorl(left.value.norm);
+  void compute_bounds()
+  {
+    lower_bound = std::floorl(leftmost.value.norm);
+    upper_bound = std::ceill(rightmost.value.norm);
+  }
 
-  // Draw all the nodes
-  draw_node_number_line(allocator, lower_bound, upper_bound);
+  void compute_bound_nodes()
+  {
+    leftmost = allocator.getVal(0);
+    while (leftmost.left.has_value())
+      leftmost = allocator.getVal(leftmost.left.value());
 
-  // Draw the bounds, with their values, in white
-  word_t lower_x = clamp_to_width(left.value.norm, lower_bound, upper_bound);
-  word_t upper_x = clamp_to_width(right.value.norm, lower_bound, upper_bound);
-  draw_fraction(left.value, lower_x, 3 * HEIGHT / 8);
-  draw_fraction(right.value, upper_x, 3 * HEIGHT / 8);
-  DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
-  DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
-}
+    rightmost = allocator.getVal(0);
+    while (rightmost.right.has_value())
+      rightmost = allocator.getVal(rightmost.right.value());
+  }
+
+  constexpr word_t clamp_to_width(long double value)
+  {
+    return WIDTH / (upper_bound - lower_bound) * (value - lower_bound);
+  }
+
+  void draw_bounds()
+  {
+    word_t lower_x = clamp_to_width(leftmost.value.norm);
+    word_t upper_x = clamp_to_width(rightmost.value.norm);
+    draw_fraction(leftmost.value, lower_x, 3 * HEIGHT / 8);
+    draw_fraction(rightmost.value, upper_x, 3 * HEIGHT / 8);
+    DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
+    DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
+  }
+
+  void draw_nodes()
+  {
+    std::stack<Node> stack;
+    stack.push(allocator.getVal(0));
+    while (!stack.empty())
+    {
+      Node n = stack.top();
+      stack.pop();
+      word_t x = clamp_to_width(n.value.norm);
+      DrawLine(x, LINE_TOP, x, LINE_BOTTOM, RED);
+      if (n.left.has_value())
+        stack.push(allocator.getVal(n.left.value()));
+      if (n.right.has_value())
+        stack.push(allocator.getVal(n.right.value()));
+    }
+  }
+};
 
 int main(void)
 {
-  // Setup CW tree
-  NodeAllocator allocator{0};
-  std::queue<word_t> to_iterate;
-  Fraction best_frac{1, 2};
-  word_t root = allocator.alloc({best_frac});
-  to_iterate.push(root);
+  // Setup state
+  State state{{1, 2}};
 
   // Setup meta text (counter, iterations, etc)
   word_t count = 1, prev_count = 0;
@@ -124,7 +123,9 @@ int main(void)
   {
     if (IsKeyPressed(KEY_SPACE))
     {
-      iterate(to_iterate, allocator);
+      iterate(state.iteration_queue, state.allocator);
+      state.compute_bound_nodes();
+      state.compute_bounds();
       count += 2;
     }
     if (prev_count != count)
@@ -139,7 +140,9 @@ int main(void)
 
     ClearBackground(BLACK);
     BeginDrawing();
-    draw_number_line(allocator);
+    DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
+    state.draw_nodes();
+    state.draw_bounds();
     DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2,
              LINE_TOP - HEIGHT / 4, FONT_SIZE * 2, WHITE);
     EndDrawing();
