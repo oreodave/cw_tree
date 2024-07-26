@@ -104,7 +104,7 @@ word_t alloc_node(Node n)
 void indent_depth(int depth, std::stringstream &ss)
 {
   for (int i = 0; i < depth; ++i)
-    ss << "\t";
+    ss << "  ";
 }
 
 std::string to_string(Node n, int depth = 1)
@@ -113,13 +113,13 @@ std::string to_string(Node n, int depth = 1)
   ss << "(" << to_string(n.value) << "\n";
   indent_depth(depth, ss);
   if (n.left == -1)
-    ss << "()";
+    ss << "NIL";
   else
     ss << to_string(nodes[n.left], depth + 1);
   ss << "\n";
   indent_depth(depth, ss);
   if (n.right == -1)
-    ss << "()";
+    ss << "NIL";
   else
     ss << to_string(nodes[n.right], depth + 1);
   ss << ")";
