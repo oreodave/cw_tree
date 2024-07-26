@@ -55,6 +55,14 @@ constexpr word_t clamp_to_width(long double value, long double min,
   return WIDTH / (max - min) * (value - min);
 }
 
+void draw_fraction(Fraction f, word_t x, word_t y)
+{
+  std::string s{to_string(f)};
+  // Centered at (x, y)
+  int width = MeasureText(s.c_str(), FONT_SIZE);
+  DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
+}
+
 int main(void)
 {
   // NodeAllocator allocator{256};
