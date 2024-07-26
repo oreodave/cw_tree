@@ -47,6 +47,13 @@ Node leftmost_node(const NodeAllocator &allocator)
   return node;
 }
 
+constexpr word_t clamp_to_width(long double value, long double min,
+                                long double max)
+{
+  // translate v in [min, max] -> v' in [0, WIDTH]
+  // [min, max] -> [0, max-min] -> [0, WIDTH]
+  return WIDTH / (max - min) * (value - min);
+}
 
 int main(void)
 {
