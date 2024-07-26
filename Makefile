@@ -17,7 +17,7 @@ endif
 
 SRC=src
 DIST=build
-CODE=$(addprefix $(SRC)/, ) # add source files here
+CODE=$(addprefix $(SRC)/, numerics.cpp) # add source files here
 OBJECTS=$(CODE:$(SRC)/%.cpp=$(DIST)/%.o)
 DEPDIR:=$(DIST)/dependencies
 DEPS:=$(CODE:$(SRC)/%.cpp=$(DEPDIR):%.d) $(DEPDIR)/main.d
