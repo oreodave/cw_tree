@@ -22,6 +22,7 @@
 #include <optional>
 #include <queue>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
@@ -59,7 +60,8 @@ struct NodeAllocator
 };
 
 word_t gcd(word_t a, word_t b);
-Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator);
+std::tuple<Fraction, Fraction, Fraction> iterate(std::queue<word_t> &queue,
+                                                 NodeAllocator &allocator);
 
 std::string to_string(const Fraction &);
 std::string to_string(const NodeAllocator &, const index_t, int depth = 1);

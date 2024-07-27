@@ -86,7 +86,8 @@ word_t gcd(word_t a, word_t b)
   return a;
 }
 
-Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
+std::tuple<Fraction, Fraction, Fraction> iterate(std::queue<word_t> &queue,
+                                                 NodeAllocator &allocator)
 {
   if (queue.empty())
     return {};
@@ -105,10 +106,10 @@ Fraction iterate(std::queue<word_t> &queue, NodeAllocator &allocator)
   queue.pop();
   queue.push(allocator.getVal(index).left.value());
   queue.push(allocator.getVal(index).right.value());
-  node          = allocator.getVal(index);
-  Fraction best = MAX(node.value, allocator.getVal(node.left.value()).value);
-  best          = MAX(best, allocator.getVal(node.right.value()).value);
-  return best;
+  node = allocator.getVal(index);
+  // NOTE: We can be assured that left and right DO have values
+  return std::tuple(allocator.getVal(node.left.value()).value, node.value,
+                    allocator.getVal(node.right.value()).value);
 }
 
 std::string to_string(const Fraction &f)
