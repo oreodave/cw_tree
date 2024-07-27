@@ -52,6 +52,11 @@ struct State
     long double lower, upper;
   } bounds;
 
+  struct Iteration
+  {
+    Fraction left, centre, right;
+  } iteration;
+
   State(const Fraction start) : allocator{256}
   {
     root = allocator.alloc(start);
@@ -63,7 +68,8 @@ struct State
 
   void do_iteration(void)
   {
-    iterate(iteration_queue, allocator);
+    std::tie(iteration.left, iteration.centre, iteration.right) =
+        iterate(iteration_queue, allocator);
     compute_bound_nodes();
     compute_bounds();
   }
@@ -116,6 +122,16 @@ struct State
         stack.push(allocator.getVal(n.right.value()));
     }
   }
+
+  void draw_iteration_nodes()
+  {
+    word_t x_left   = clamp_to_width(iteration.left.norm);
+    word_t x_centre = clamp_to_width(iteration.centre.norm);
+    word_t x_right  = clamp_to_width(iteration.right.norm);
+    DrawLine(x_left, LINE_TOP, x_left, LINE_BOTTOM, BLUE);
+    DrawLine(x_right, LINE_TOP, x_right, LINE_BOTTOM, BLUE);
+    DrawLine(x_centre, LINE_TOP, x_centre, LINE_BOTTOM, GREEN);
+  }
 };
 
 int main(void)
@@ -152,6 +168,7 @@ int main(void)
     DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
     state.draw_nodes();
     state.draw_bounds();
+    state.draw_iteration_nodes();
     DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2,
              LINE_TOP - HEIGHT / 4, FONT_SIZE * 2, WHITE);
     EndDrawing();
