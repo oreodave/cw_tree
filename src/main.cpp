@@ -16,6 +16,7 @@
 
 #include "./numerics.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <iostream>
@@ -140,6 +141,9 @@ struct State
   }
 };
 
+using Clock = std::chrono::steady_clock;
+using Ms    = std::chrono::milliseconds;
+
 int main(void)
 {
   // Setup state
@@ -152,14 +156,31 @@ int main(void)
   word_t format_str_width = 0;
   Fraction previous_leftmost, previous_rightmost;
 
+  auto time_current         = Clock::now();
+  auto time_previous        = time_current;
+  constexpr auto time_delta = 10;
+
   InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Tree");
   while (!WindowShouldClose())
   {
+    // timer logic
+    time_current = Clock::now();
+    if (std::chrono::duration_cast<Ms>(time_current - time_previous).count() >=
+        time_delta)
+    {
+      time_previous = time_current;
+      state.do_iteration();
+      count += 2;
+    }
+
+    // Input logic
     if (IsKeyPressed(KEY_SPACE))
     {
       state.do_iteration();
       count += 2;
     }
+
+    // Meta text logic
     if (prev_count != count)
     {
       prev_count = count;
