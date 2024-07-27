@@ -102,7 +102,7 @@ struct State
 
   constexpr word_t clamp_to_width(long double value)
   {
-    return WIDTH / (bounds.upper - bounds.lower) * (value - bounds.lower);
+    return (WIDTH / (bounds.upper - bounds.lower)) * (value - bounds.lower);
   }
 
   void draw_bounds()
@@ -147,7 +147,7 @@ using Ms    = std::chrono::milliseconds;
 int main(void)
 {
   // Setup state
-  State state{{1, 2}};
+  State state{{1, 1}};
 
   // Setup meta text (counter, iterations, etc)
   word_t count = 1, prev_count = 0;
@@ -156,9 +156,10 @@ int main(void)
   word_t format_str_width = 0;
   Fraction previous_leftmost, previous_rightmost;
 
+  // Setup timer
   auto time_current         = Clock::now();
   auto time_previous        = time_current;
-  constexpr auto time_delta = 10;
+  constexpr auto time_delta = 1;
 
   InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Tree");
   while (!WindowShouldClose())
