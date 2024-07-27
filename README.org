@@ -1,0 +1,34 @@
+#+title: Calkin-Wilf trees
+#+author: Aryadev Chavali
+#+date: 2024-07-27
+
+A graphical visualisation of
+[[https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree][Calkin-Wilf
+trees]].
+
+Currently visualises it using a self adjusting number line, from the
+smallest fraction to the largest fraction generated.  Both are always
+positive.
+
+The bound fractions are drawn in white, while all other fractions are
+in red.  On any one iteration (taking any one fraction and generating
+its two children fractions), the generated fractions are in blue while
+the generator fraction is in green.
+
+This was done just for fun really, but it's quite fun to see it
+generate a dense number line over many iterations.
+* TODOs
+** TODO Multithreading
+Currently single threaded.  A multithreaded implementation could have
+multiple nodes generated at once, which would speed up the
+implementation.
+
+Might need to study my current implementation to see if it could be
+done better.
+** TODO Prettify code base
+It's a big blob of code currently in the graphics portion.  Not very
+pretty but it gets the job done.  Try modularisation.
+** TODO Tree visualisation
+Instead of a number line, how about visualising the actual tree at
+work as a graph of nodes?  Maybe colouring nodes based on where it is
+on the number line.
