@@ -32,11 +32,19 @@
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
 
-void draw_fraction(Fraction f, word_t x, word_t y)
+std::pair<std::string, int> get_fraction_drawable(Fraction f)
 {
   std::string s{to_string(f)};
-  // Centered at (x, y)
   int width = MeasureText(s.c_str(), FONT_SIZE);
+  return std::make_pair(s, width);
+}
+
+void draw_fraction(Fraction f, word_t x, word_t y)
+{
+  std::string s;
+  int width;
+  std::tie(s, width) = get_fraction_drawable(f);
+  // Centered at (x, y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
@@ -100,8 +108,6 @@ struct State
   {
     word_t lower_x = clamp_to_width(bounds.leftmost.value.norm);
     word_t upper_x = clamp_to_width(bounds.rightmost.value.norm);
-    draw_fraction(bounds.leftmost.value, lower_x, 3 * HEIGHT / 8);
-    draw_fraction(bounds.rightmost.value, upper_x, 3 * HEIGHT / 8);
     DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
     DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
   }
@@ -144,6 +150,7 @@ int main(void)
   std::stringstream format_stream;
   std::string format_str;
   word_t format_str_width = 0;
+  Fraction previous_leftmost, previous_rightmost;
 
   InitWindow(WIDTH, HEIGHT, "Calkin-Wilf Tree");
   while (!WindowShouldClose())
@@ -156,8 +163,11 @@ int main(void)
     if (prev_count != count)
     {
       prev_count = count;
-      format_stream << "Count=" << count << "\n\n";
-      format_stream << "Iterations=" << (count - 1) / 2;
+      format_stream << "Count=" << count << "\n\n"
+                    << "Iterations=" << (count - 1) / 2 << "\n\n"
+                    << "Lower=" << to_string(state.bounds.leftmost.value)
+                    << "\n\n"
+                    << "Upper=" << to_string(state.bounds.rightmost.value);
       format_str = format_stream.str();
       format_stream.str("");
       format_str_width = MeasureText(format_str.c_str(), FONT_SIZE * 2);
@@ -169,8 +179,8 @@ int main(void)
     state.draw_nodes();
     state.draw_bounds();
     state.draw_iteration_nodes();
-    DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2,
-             LINE_TOP - HEIGHT / 4, FONT_SIZE * 2, WHITE);
+    DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2, HEIGHT / 8,
+             FONT_SIZE, WHITE);
     EndDrawing();
   }
   CloseWindow();
