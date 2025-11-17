@@ -154,9 +154,9 @@ int main(void)
   std::stringstream format_stream;
   std::string format_str;
   word_t format_str_width = 0;
-  Fraction previous_leftmost, previous_rightmost;
 
   // Setup timer
+  bool is_playing           = false;
   auto time_current         = Clock::now();
   auto time_previous        = time_current;
   constexpr auto time_delta = 1;
@@ -166,8 +166,9 @@ int main(void)
   {
     // timer logic
     time_current = Clock::now();
-    if (std::chrono::duration_cast<Ms>(time_current - time_previous).count() >=
-        time_delta)
+    if (is_playing &&
+        std::chrono::duration_cast<Ms>(time_current - time_previous).count() >=
+            time_delta)
     {
       time_previous = time_current;
       state.do_iteration();
@@ -175,7 +176,16 @@ int main(void)
     }
 
     // Input logic
-    if (IsKeyPressed(KEY_SPACE))
+    if (IsKeyDown(KEY_SPACE))
+    {
+      is_playing = true;
+    }
+    else if (IsKeyUp(KEY_SPACE))
+    {
+      is_playing = false;
+    }
+
+    if (IsKeyPressed(KEY_PERIOD))
     {
       state.do_iteration();
       count += 2;
