@@ -2,6 +2,7 @@
 #+author: Aryadev Chavali
 #+date: 2024-07-27
 #+filetags: cpp cw_tree
+#+options: toc:nil
 
 A graphical visualisation of
 [[https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree][Calkin-Wilf
@@ -28,12 +29,28 @@ implementation.
 Might need to study my current implementation to see if it could be
 done better.
 
-2025-11-17: Notes:
-- Mutex on the queue [[file:src/main.cpp::std::queue<word_t>
-  iteration_queue;][the queue]] and the allocator will be necessary.
-- Perhaps we could do two mutexes, one per structure?
-- We'd need to lock for [[file:src/numerics.cpp::std::tuple<Fraction,
-  Fraction, Fraction> iterate(std::queue<word_t> &queue,][iterate]]
+*** TODO Formalise state structure (separate drawing functions)
+Make a dedicated header and fit the necessary functions to our state
+structure: [[file:src/main.cpp::struct State][state structure]].
+
+We need this in order so that we can get multithreading (using mutexes
+on the actual state itself) working.
+
+A good working name would be ~cw_state~.
+
+We could then have a separate structure for the drawing context
+(~cw_draw~) which can update itself by reading the ~cw_state~.
+*** TODO Setup a queue and allocator mutex on state
+We need one for the queue so we can make clean pushes and pops, and
+one for the allocator to ensure we're not messing up our indices in
+the nodes.
+
+We could just set these up in the state structure itself to make
+lookup easier.
+*** TODO Make iterate use the state structure and mutexes
+[[file:src/numerics.cpp::std::tuple<Fraction, Fraction, Fraction>
+iterate(std::queue<word_t> &queue,]]
+
 - Locking scheme could be:
   - Lock queue when popping a value as root, then unlock.
   - Leave queue and allocator unlocked while getting root/left/right
@@ -44,6 +61,10 @@ done better.
   - Queue lock when pushing the left and right fractions for further
     processing, then unlock
   - Unlock all when returning relevant values
+
+I think this scheme minimises the any mutex is locked to just the bare
+minimum, ensuring other threads can get in on the action.
+*** TODO Setup a thread pool utilising state and iterate
 ** TODO Prettify code base
 It's a big blob of code currently in the graphics portion.  Not very
 pretty but it gets the job done.  Try modularisation.
