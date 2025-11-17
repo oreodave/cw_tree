@@ -1,6 +1,7 @@
 #+title: Calkin-Wilf trees
 #+author: Aryadev Chavali
 #+date: 2024-07-27
+#+filetags: cpp cw_tree
 
 A graphical visualisation of
 [[https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree][Calkin-Wilf
@@ -19,12 +20,30 @@ This was done just for fun really, but it's quite fun to see it
 generate a dense number line over many iterations.
 * TODOs
 ** TODO Multithreading
+SCHEDULED: <2025-11-18 Tue>
 Currently single threaded.  A multithreaded implementation could have
 multiple nodes generated at once, which would speed up the
 implementation.
 
 Might need to study my current implementation to see if it could be
 done better.
+
+2025-11-17: Notes:
+- Mutex on the queue [[file:src/main.cpp::std::queue<word_t>
+  iteration_queue;][the queue]] and the allocator will be necessary.
+- Perhaps we could do two mutexes, one per structure?
+- We'd need to lock for [[file:src/numerics.cpp::std::tuple<Fraction,
+  Fraction, Fraction> iterate(std::queue<word_t> &queue,][iterate]]
+- Locking scheme could be:
+  - Lock queue when popping a value as root, then unlock.
+  - Leave queue and allocator unlocked while getting root/left/right
+    values (readonly) and computing (but not setting/allocating) the
+    left and right node values
+  - Allocator Lock when allocating the left/right values, setting the
+    root's left and right, then unlock.
+  - Queue lock when pushing the left and right fractions for further
+    processing, then unlock
+  - Unlock all when returning relevant values
 ** TODO Prettify code base
 It's a big blob of code currently in the graphics portion.  Not very
 pretty but it gets the job done.  Try modularisation.

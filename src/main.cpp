@@ -33,7 +33,7 @@
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
 
-std::pair<std::string, int> get_fraction_drawable(Fraction f)
+std::pair<std::string, int> fraction_to_string(Fraction f)
 {
   std::string s{to_string(f)};
   int width = MeasureText(s.c_str(), FONT_SIZE);
@@ -44,7 +44,7 @@ void draw_fraction(Fraction f, word_t x, word_t y)
 {
   std::string s;
   int width;
-  std::tie(s, width) = get_fraction_drawable(f);
+  std::tie(s, width) = fraction_to_string(f);
   // Centered at (x, y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
