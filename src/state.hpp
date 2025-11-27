@@ -24,7 +24,7 @@ namespace cw::state
     std::mutex mutex_queue;
     std::mutex mutex_allocator;
 
-    State(void);
+    State(void) {};
   };
 
   struct DrawState
@@ -36,7 +36,7 @@ namespace cw::state
       f64 lower_val, upper_val;
     } bounds;
 
-    DrawState(const State &);
+    DrawState(const State &state) : state{state} {};
 
     void compute_bounds(void);
   };
