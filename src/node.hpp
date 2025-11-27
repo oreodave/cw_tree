@@ -32,12 +32,10 @@ namespace cw::node
   struct Node
   {
     Fraction value;
-    index_t left, right;
+    i64 left, right;
 
-    Node(const Fraction &&val = {}, index_t left = -1, index_t right = -1);
+    Node(const Fraction &&val = {}, i64 left = -1, i64 right = -1);
   };
-
-  std::string to_string(const Node &);
 
   struct NodeAllocator
   {
@@ -49,7 +47,7 @@ namespace cw::node
     Node &get_ref(u64 n);
   };
 
-  std::string to_string(const NodeAllocator &, const index_t, int depth = 1);
+  std::string to_string(const NodeAllocator &, const i64, int depth = 1);
 } // namespace cw::node
 
 #endif
