@@ -37,6 +37,17 @@ inline bool index_has_value(index_t i)
   return i >= 0;
 }
 
+inline u64 gcd(u64 a, u64 b)
+{
+  if (a == b)
+    return a;
+  else if (a <= 1 || b <= 1)
+    return 1;
+  for (u64 r = b % a; r != 0; b = a, a = r, r = b % a)
+    continue;
+  return a;
+}
+
 #endif
 
 /* Copyright (C) 2025 Aryadev Chavali
