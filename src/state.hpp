@@ -8,6 +8,7 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
+#include <mutex>
 #include <queue>
 
 #include "base.hpp"
@@ -19,6 +20,9 @@ namespace cw::state
   {
     cw::node::NodeAllocator allocator;
     std::queue<u64> queue;
+
+    std::mutex mutex_queue;
+    std::mutex mutex_allocator;
 
     State(void);
   };
