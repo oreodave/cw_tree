@@ -1,17 +1,8 @@
-/* Copyright (C) 2024 Aryadev Chavali
-
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License Version 2 for
- * details.
-
- * You may distribute and modify this code under the terms of the GNU General
- * Public License Version 2, which you should have received a copy of along with
- * this program.  If not, please go to <https://www.gnu.org/licenses/>.
-
+/* numerics.cpp: Implementation of numerics
  * Created: 2024-07-26
  * Author: Aryadev Chavali
- * Description: Implementation of numerics
+ * License: See end of file
+ * Commentary:
  */
 
 #include "./numerics.hpp"
@@ -147,3 +138,16 @@ std::string to_string(const NodeAllocator &allocator, const index_t n,
   ss << ")";
   return ss.str();
 }
+
+/* Copyright (C) 2024, 2025 Aryadev Chavali
+
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License Version 2 for
+ * details.
+
+ * You may distribute and modify this code under the terms of the GNU General
+ * Public License Version 2, which you should have received a copy of along with
+ * this program.  If not, please go to <https://www.gnu.org/licenses/>.
+
+ */
