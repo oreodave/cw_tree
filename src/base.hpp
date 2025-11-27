@@ -30,13 +30,6 @@ static_assert(sizeof(double) == 8, "f64 requires 8 byte doubles");
 using f32 = float;
 using f64 = double;
 
-using index_t = i64;
-
-inline bool index_has_value(index_t i)
-{
-  return i >= 0;
-}
-
 inline u64 gcd(u64 a, u64 b)
 {
   if (a == b)
