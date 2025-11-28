@@ -40,6 +40,7 @@ void draw_fraction(Fraction f, word_t x, word_t y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
+#if 0
 struct State
 {
   NodeAllocator allocator;
@@ -209,6 +210,7 @@ int main(void)
   CloseWindow();
   return 0;
 }
+#endif
 
 /* Copyright (C) 2024, 2025 Aryadev Chavali
 
