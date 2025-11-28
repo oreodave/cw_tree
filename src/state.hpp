@@ -21,6 +21,7 @@ namespace cw::state
     cw::node::NodeAllocator allocator;
     std::queue<u64> queue;
 
+    bool pause_work, stop_work;
     std::mutex mutex_queue;
     std::mutex mutex_allocator;
 
