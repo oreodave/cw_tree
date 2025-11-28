@@ -5,8 +5,11 @@
  * Commentary:
  */
 
-#include "worker.hpp"
+#include <chrono>
+#include <thread>
 #include <tuple>
+
+#include "worker.hpp"
 
 namespace cw::worker
 {
@@ -53,6 +56,20 @@ namespace cw::worker
     state.queue.push(left_child);
     state.queue.push(right_child);
     state.mutex_queue.unlock();
+  }
+
+  void worker(State &state)
+  {
+    while (!state.stop_work)
+    {
+      std::this_thread::sleep_for(THREAD_GENERAL_DELAY);
+      while (state.pause_work)
+      {
+        std::this_thread::sleep_for(THREAD_PAUSE_DELAY);
+      }
+
+      do_iteration(state);
+    }
   }
 } // namespace cw::worker
 

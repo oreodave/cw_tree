@@ -8,6 +8,7 @@
 #ifndef WORKER_HPP
 #define WORKER_HPP
 
+#include <chrono>
 #include <tuple>
 
 #include "state.hpp"
@@ -16,6 +17,8 @@ namespace cw::worker
 {
   using cw::node::NodeAllocator;
   using cw::state::State;
+  constexpr auto THREAD_PAUSE_DELAY   = std::chrono::milliseconds(1000);
+  constexpr auto THREAD_GENERAL_DELAY = std::chrono::milliseconds(1);
 
   // Given `index`, return the indices of its children in the tree.  If not
   // present already, generate them using the allocator.
@@ -28,6 +31,10 @@ namespace cw::worker
   // Each step will block on the relevant mutex for the resource (1,3 will block
   // on the queue mutex, 2 will block on the allocator mutex) so is thread safe.
   void do_iteration(State &state);
+
+  // Steady living thread worker which performs iterations.  If state.pause_work
+  // is true, thread will pause until otherwise.
+  void worker(State &state);
 } // namespace cw::worker
 
 #endif
