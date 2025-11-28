@@ -5,17 +5,21 @@
  * Commentary: 2024-07-25
  */
 
-#include "./numerics.hpp"
-
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
 #include <stack>
+#include <thread>
 #include <tuple>
 
 #include <raylib.h>
+
+#include "base.hpp"
+#include "node.hpp"
+#include "numerics.hpp"
+#include "worker.hpp"
 
 #define WIDTH       1024
 #define HEIGHT      1024
@@ -23,6 +27,9 @@
 #define CIRCLE_SIZE 2
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
+
+using cw::state::DrawState;
+using cw::state::State;
 
 std::pair<std::string, int> fraction_to_string(Fraction f)
 {
@@ -38,6 +45,120 @@ void draw_fraction(Fraction f, word_t x, word_t y)
   std::tie(s, width) = fraction_to_string(f);
   // Centered at (x, y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
+}
+
+constexpr u64 clamp_to_width(const DrawState &ds, f64 val)
+{
+  return (WIDTH / (ds.bounds.upper_val - ds.bounds.lower_val)) *
+         (val - ds.bounds.lower_val);
+}
+
+void draw_tree(const DrawState &ds)
+{
+  // Number line
+  DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
+
+  // Bounds
+  u64 lower_x = clamp_to_width(ds, ds.bounds.leftmost.value.norm);
+  u64 upper_x = clamp_to_width(ds, ds.bounds.rightmost.value.norm);
+  DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
+  DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
+
+  std::stack<cw::node::Node> stack;
+  stack.push(ds.state.allocator.get_val(0));
+  while (!stack.empty())
+  {
+    auto n = stack.top();
+    stack.pop();
+    u64 x = clamp_to_width(ds, n.value.norm);
+    DrawLine(x, LINE_TOP, x, LINE_BOTTOM, RED);
+    if (n.left >= 0)
+      stack.push(ds.state.allocator.get_val(n.left));
+    if (n.right >= 0)
+      stack.push(ds.state.allocator.get_val(n.right));
+  }
+}
+
+using Clock = std::chrono::steady_clock;
+using Ms    = std::chrono::milliseconds;
+
+int main(void)
+{
+  // Init general state
+  cw::state::State state;
+  cw::state::DrawState draw_state{state};
+
+  // Init timer
+  auto time_current         = Clock::now();
+  auto time_previous        = time_current;
+  constexpr auto time_delta = 1;
+
+  // Init meta text (counter, iterations, etc)
+  u64 count = 1, prev_count = 0;
+  std::stringstream format_stream;
+  std::string format_str;
+  u64 format_str_width = 0;
+
+  // Setup our first node (1/1)
+  state.allocator.alloc(cw::node::Node{{1, 1}, -1, -1});
+  state.queue.push(0);
+
+  // Init thread
+  std::thread threads[] = {
+      std::thread(cw::worker::worker, std::ref(state)),
+      std::thread(cw::worker::worker, std::ref(state)),
+      std::thread(cw::worker::worker, std::ref(state)),
+      std::thread(cw::worker::worker, std::ref(state)),
+  };
+
+  // Setup raylib window
+  InitWindow(WIDTH, HEIGHT, "Calkin-Wilf tree");
+  SetTargetFPS(60);
+
+  while (!WindowShouldClose())
+  {
+    // Update
+    time_current = Clock::now();
+    count        = state.allocator.vec.size();
+    if (!state.pause_work &&
+        std::chrono::duration_cast<Ms>(time_current - time_previous).count() >=
+            time_delta)
+    {
+      time_previous = time_current;
+    }
+
+    if (prev_count != count)
+    {
+      draw_state.compute_bounds();
+      prev_count = count;
+      format_stream << "Count=" << count << "\n\n"
+                    << "Iterations=" << (count - 1) / 2 << "\n\n"
+                    << "Lower=" << to_string(draw_state.bounds.leftmost.value)
+                    << "\n\n"
+                    << "Upper=" << to_string(draw_state.bounds.rightmost.value);
+      format_str = format_stream.str();
+      format_stream.str("");
+      format_str_width = MeasureText(format_str.c_str(), FONT_SIZE * 2);
+    }
+
+    // Draw
+
+    ClearBackground(BLACK);
+    BeginDrawing();
+    draw_tree(draw_state);
+    DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2, HEIGHT / 8,
+             FONT_SIZE, WHITE);
+    EndDrawing();
+  }
+
+  CloseWindow();
+
+  state.stop_work = true;
+  for (auto &thread : threads)
+  {
+    thread.join();
+  }
+  return 0;
 }
 
 #if 0
