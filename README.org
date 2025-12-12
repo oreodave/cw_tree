@@ -20,8 +20,28 @@ the generator fraction is in green.
 This was done just for fun really, but it's quite fun to see it
 generate a dense number line over many iterations.
 * TODOs
-** TODO Multithreading
-SCHEDULED: <2025-11-18 Tue>
+** TODO Tree visualisation
+Instead of a number line, how about visualising the actual tree at
+work as a graph of nodes?  Maybe colouring nodes based on where it is
+on the number line.
+** TODO Don't walk the tree everytime we compute_bounds
+[[file:src/state.cpp::void DrawState::compute_bounds()][location]]
+
+We already have the latest bound nodes so we're part-way through the
+tree.  Just keep going down what we have so far surely?  Even better,
+don't use nodes _at all_.  Run with an index!
+** DONE Fix weird issue at past 100K nodes
+std::vector seems to crap itself past 100K nodes - we keep getting
+heap-use-after-free issues when trying to access the allocator nodes
+at that point.  Seemingly random.  What's going on?
+
+Solution: _everytime_ we want to access the allocator for nontrivial
+(like memory reads) we need to lock the mutex.  No two ways about it.
+All draw functions were causing the issue.
+** DONE Prettify code base
+It's a big blob of code currently in the graphics portion.  Not very
+pretty but it gets the job done.  Try modularisation.
+** DONE Multithreading
 Currently single threaded.  A multithreaded implementation could have
 multiple nodes generated at once, which would speed up the
 implementation.
@@ -29,7 +49,7 @@ implementation.
 Might need to study my current implementation to see if it could be
 done better.
 
-*** TODO Formalise state structure (separate drawing functions)
+*** DONE Formalise state structure (separate drawing functions)
 Make a dedicated header and fit the necessary functions to our state
 structure: [[file:src/main.cpp::struct State][state structure]].
 
@@ -40,14 +60,14 @@ A good working name would be ~cw_state~.
 
 We could then have a separate structure for the drawing context
 (~cw_draw~) which can update itself by reading the ~cw_state~.
-*** TODO Setup a queue and allocator mutex on state
+*** DONE Setup a queue and allocator mutex on state
 We need one for the queue so we can make clean pushes and pops, and
 one for the allocator to ensure we're not messing up our indices in
 the nodes.
 
 We could just set these up in the state structure itself to make
 lookup easier.
-*** TODO Make iterate use the state structure and mutexes
+*** DONE Make iterate use the state structure and mutexes
 [[file:src/numerics.cpp::std::tuple<Fraction, Fraction, Fraction>
 iterate(std::queue<word_t> &queue,]]
 
@@ -64,11 +84,4 @@ iterate(std::queue<word_t> &queue,]]
 
 I think this scheme minimises the any mutex is locked to just the bare
 minimum, ensuring other threads can get in on the action.
-*** TODO Setup a thread pool utilising state and iterate
-** TODO Prettify code base
-It's a big blob of code currently in the graphics portion.  Not very
-pretty but it gets the job done.  Try modularisation.
-** TODO Tree visualisation
-Instead of a number line, how about visualising the actual tree at
-work as a graph of nodes?  Maybe colouring nodes based on where it is
-on the number line.
+*** DONE Setup a thread pool utilising state and iterate
