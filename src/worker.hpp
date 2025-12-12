@@ -18,7 +18,7 @@ namespace cw::worker
   using cw::node::NodeAllocator;
   using cw::state::State;
   constexpr auto THREAD_PAUSE_DELAY   = std::chrono::milliseconds(1000);
-  constexpr auto THREAD_GENERAL_DELAY = std::chrono::milliseconds(1);
+  constexpr auto THREAD_GENERAL_DELAY = std::chrono::milliseconds(10);
 
   // Performs a single iteration which consists of the following:
   // 1) pop an index off the iteration queue
