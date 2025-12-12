@@ -15,17 +15,19 @@
 #include <tuple>
 
 #include <raylib.h>
+#include <raymath.h>
 
 #include "base.hpp"
 #include "node.hpp"
 #include "worker.hpp"
 
 #define WIDTH       1024
-#define HEIGHT      1024
+#define HEIGHT      800
 #define FONT_SIZE   20
 #define CIRCLE_SIZE 2
 #define LINE_TOP    (7 * HEIGHT / 16)
 #define LINE_BOTTOM (9 * HEIGHT / 16)
+#define N_THREADS   15
 
 using cw::state::DrawState;
 using cw::state::State;
@@ -46,23 +48,12 @@ void draw_fraction(cw::node::Fraction f, u64 x, u64 y)
   DrawText(s.c_str(), x - width / 2, y - FONT_SIZE, FONT_SIZE, WHITE);
 }
 
-constexpr u64 clamp_to_width(const DrawState &ds, f64 val)
-{
-  return (WIDTH / (ds.bounds.upper_val - ds.bounds.lower_val)) *
-         (val - ds.bounds.lower_val);
-}
-
 void draw_tree(DrawState &ds, State &state)
 {
   // Number line
   DrawLine(0, HEIGHT / 2, WIDTH, HEIGHT / 2, WHITE);
 
   // Bounds
-  u64 lower_x = clamp_to_width(ds, ds.bounds.leftmost.value.norm);
-  u64 upper_x = clamp_to_width(ds, ds.bounds.rightmost.value.norm);
-  DrawLine(lower_x, LINE_TOP, lower_x, LINE_BOTTOM, WHITE);
-  DrawLine(upper_x, LINE_TOP, upper_x, LINE_BOTTOM, WHITE);
-
   state.mutex.lock();
   std::stack<std::pair<u64, f64>> stack;
   cw::node::Node n = state.allocator.get_val(0);
@@ -73,7 +64,7 @@ void draw_tree(DrawState &ds, State &state)
     f64 norm;
     std::tie(node_index, norm) = stack.top();
     stack.pop();
-    u64 x = clamp_to_width(ds, norm);
+    u64 x = Remap(norm, ds.bounds.lower_val, ds.bounds.upper_val, 0, WIDTH);
     DrawLine(x, LINE_TOP, x, LINE_BOTTOM, RED);
 
     cw::node::Node n = state.allocator.get_val(node_index);
@@ -89,6 +80,14 @@ void draw_tree(DrawState &ds, State &state)
     }
   }
   state.mutex.unlock();
+
+  DrawLine(0, LINE_TOP, 0, LINE_BOTTOM, WHITE);
+  DrawText("0", 0, LINE_TOP - FONT_SIZE, FONT_SIZE, WHITE);
+  DrawLine(WIDTH, LINE_TOP, WIDTH, LINE_BOTTOM, WHITE);
+  char buffer[64];
+  sprintf(buffer, "%d", (int)ds.bounds.upper_val);
+  DrawText(buffer, WIDTH - (FONT_SIZE / 2), LINE_TOP - FONT_SIZE, FONT_SIZE,
+           WHITE);
 }
 
 using Clock = std::chrono::steady_clock;
@@ -116,10 +115,9 @@ int main(void)
   std::string format_str;
   u64 format_str_width = 0;
 
-// Init threads
-#define THREADS 15
-  std::thread threads[THREADS];
-  for (auto i = 0; i < THREADS; ++i)
+  // Init threads
+  std::thread threads[N_THREADS];
+  for (auto i = 0; i < N_THREADS; ++i)
   {
     threads[i] = std::move(std::thread(cw::worker::worker, std::ref(state)));
   }
@@ -127,6 +125,13 @@ int main(void)
   // Setup raylib window
   InitWindow(WIDTH, HEIGHT, "Calkin-Wilf tree");
   SetTargetFPS(60);
+
+  // setup camera
+  Camera2D camera;
+  camera.target   = {.x = 0, .y = 0};
+  camera.offset   = {.x = WIDTH / 16, .y = 0};
+  camera.rotation = 0.0f;
+  camera.zoom     = 0.8f;
 
   while (!WindowShouldClose())
   {
@@ -155,17 +160,33 @@ int main(void)
     }
 
     if (IsKeyPressed(KEY_SPACE))
-    {
       state.pause_work = !state.pause_work;
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+      Vector2 delta = GetMouseDelta();
+      delta         = Vector2Scale(delta, -1.0f / camera.zoom);
+      camera.target = Vector2Add(camera.target, delta);
+    }
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0)
+    {
+      Vector2 mouse_to_world = GetScreenToWorld2D(GetMousePosition(), camera);
+      camera.offset          = GetMousePosition();
+      camera.target          = mouse_to_world;
+      camera.zoom            = Clamp(camera.zoom + (wheel * 0.1f), 0.125, 64);
+      printf("%lf\n", camera.zoom);
     }
 
     // Draw
 
     ClearBackground(BLACK);
     BeginDrawing();
+    BeginMode2D(camera);
     draw_tree(draw_state, state);
-    DrawText(format_str.c_str(), WIDTH / 2 - format_str_width / 2, HEIGHT / 8,
-             FONT_SIZE, WHITE);
+    EndMode2D();
+    DrawText(format_str.c_str(), (31 * WIDTH / 32) - format_str_width / 2,
+             HEIGHT / 32, FONT_SIZE, WHITE);
     EndDrawing();
   }
 

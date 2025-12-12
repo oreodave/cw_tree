@@ -22,7 +22,6 @@ namespace cw::state
       bounds.rightmost = state.allocator.get_val(bounds.rightmost.right);
     state.mutex.unlock();
 
-    bounds.lower_val = std::floorl(bounds.leftmost.value.norm);
     bounds.upper_val = std::ceill(bounds.rightmost.value.norm);
   }
 } // namespace cw::state

@@ -36,7 +36,11 @@ namespace cw::state
       f64 lower_val, upper_val;
     } bounds;
 
-    DrawState(State &state) : state{state} {};
+    DrawState(State &state) : state{state}
+    {
+      // lim n -> -∞
+      bounds.lower_val = 0;
+    };
 
     void compute_bounds(void);
   };
