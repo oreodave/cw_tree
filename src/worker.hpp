@@ -13,12 +13,21 @@
 
 #include "state.hpp"
 
+#ifndef THREAD_PAUSE_MS
+#define THREAD_PAUSE_MS 1000
+#endif
+#ifndef THREAD_GENERAL_MS
+#define THREAD_GENERAL_MS 10
+#endif
+
 namespace cw::worker
 {
   using cw::node::NodeAllocator;
   using cw::state::State;
-  constexpr auto THREAD_PAUSE_DELAY   = std::chrono::milliseconds(1000);
-  constexpr auto THREAD_GENERAL_DELAY = std::chrono::milliseconds(10);
+  constexpr auto THREAD_PAUSE_DELAY =
+      std::chrono::milliseconds(THREAD_PAUSE_MS);
+  constexpr auto THREAD_GENERAL_DELAY =
+      std::chrono::milliseconds(THREAD_GENERAL_MS);
 
   // Performs a single iteration which consists of the following:
   // 1) pop an index off the iteration queue
